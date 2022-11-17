@@ -1465,7 +1465,8 @@ namespace reshade
 
 		/// <summary>
 		/// Called right before ReShade effects are rendered.
-		/// <para>Callback function signature: <c>void (api::effect_runtime *runtime, api::command_list *cmd_list, api::resource_view rtv, api::resource_view rtv_srgb)</c></para>
+		/// <para>Callback function signature: <c>void (api::effect_runtime *runtime, api::command_list *cmd_list, api::resource_view rtv, api::resource_view 
+		/// )</c></para>
 		/// </summary>
 		reshade_begin_effects,
 

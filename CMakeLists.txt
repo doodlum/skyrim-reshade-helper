@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(
-	SSEReShadeHelper
+	FO4ReShadeHelper
 	VERSION 1.0.0
 	LANGUAGES CXX
 )
@@ -19,4 +19,11 @@ target_include_directories(
 		${SIMPLEINI_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC CommonLibSSE::CommonLibSSE)
+target_link_libraries(
+	${PROJECT_NAME} 
+	PUBLIC 
+	${CommonLibName}::${CommonLibName}
+	PRIVATE
+		debug ${CMAKE_CURRENT_SOURCE_DIR}/extern/detours/x64/Debug/detours.lib
+		optimized ${CMAKE_CURRENT_SOURCE_DIR}/extern/detours/x64/Release/detours.lib
+)

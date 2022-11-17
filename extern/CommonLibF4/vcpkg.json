@@ -1,0 +1,17 @@
+{
+  "name": "umbrella",
+  "version-string": "1",
+  "dependencies": [
+    "args",
+    "boost-stl-interfaces",
+    "catch2",
+    "fmt",
+    "frozen",
+    "mmio",
+    "nowide",
+    "robin-hood-hashing",
+    "spdlog",
+    "srell",
+    "xbyak"
+  ]
+}

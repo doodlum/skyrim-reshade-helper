@@ -137,6 +137,18 @@
 				"win64",
 				"msvc"
 			]
+		},
+		{
+			"name": "FALLOUT4",
+			"cacheVariables": {
+				"BUILD_FALLOUT4": true
+			},
+			"inherits": [
+				"common",
+				"vcpkg",
+				"win64",
+				"msvc"
+			]
 		}
 	]
 }

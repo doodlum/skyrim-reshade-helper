@@ -22,18 +22,31 @@ static void on_reshade_begin_effects(effect_runtime* runtime, command_list* cmd_
 	m_rtv = rtv;
 	m_rtv_srgb = rtv_srgb;
 }
+int         index = 0;
+resource_view backbuffer;
+
+static void on_init_resource_view([[maybe_unused]] device* device, [[maybe_unused]] resource resource, [[maybe_unused]] resource_usage usage_type, [[maybe_unused]] const resource_view_desc& desc, [[maybe_unused]] resource_view view)
+{
+	if (index == 1) {
+		backbuffer = view;
+	}
+	index++;
+}
+
 
 void register_addon_events()
 {
 	reshade::register_event<reshade::addon_event::reshade_begin_effects>(on_reshade_begin_effects);
+	reshade::register_event<reshade::addon_event::init_resource_view>(on_init_resource_view);
 }
 
 void unregister_addon_events()
 {
 	reshade::unregister_event<reshade::addon_event::reshade_begin_effects>(on_reshade_begin_effects);
+	reshade::unregister_event<reshade::addon_event::init_resource_view>(on_init_resource_view);
 }
 
-extern "C" __declspec(dllexport) const char* NAME = "SSE ReShade Helper";
+extern "C" __declspec(dllexport) const char* NAME = "FO4 ReShade Helper";
 extern "C" __declspec(dllexport) const char* DESCRIPTION = "Renders ReShade effects before the UI, by PureDark and doodlez";
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
@@ -59,13 +72,14 @@ struct Hooks
 		{
 			func(BSGraphics_Renderer, unk);
 			if (m_runtime) {
-				m_runtime->render_effects(m_cmdlist, m_rtv, m_rtv_srgb);
+				m_runtime->render_effects(m_cmdlist, backbuffer, backbuffer);
 			}
 		}
 		static inline REL::Relocation<decltype(thunk)> func;
 	};
 };
 
+void PatchD3D11();
 
 void Load()
 {
@@ -73,7 +87,7 @@ void Load()
 		logger::info("Registered addon");
 		register_addon_events();
 		// Pre-UI Hook for rendering effects
-		stl::write_thunk_call<Hooks::Main_DrawWorld_MainDraw>(REL::RelocationID(79947, 82084).address() + REL::Relocate(0x16F, 0x17A));  // EBF510 (EBF67F), F05BF0 (F05D6A)
+		stl::write_thunk_call<Hooks::Main_DrawWorld_MainDraw>(REL::ID(408683).address() + 0xDA);
 		logger::info("Installed render hook");
 	} else {
 		logger::info("ReShade not present, not installing hook");
