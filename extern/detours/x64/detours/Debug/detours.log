@@ -1,0 +1,8 @@
+﻿  The vcpkg manifest was disabled, but we found a manifest file in D:\GitHub\skyrim-drs\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  stdafx.cpp
+  Detours.cpp
+  Detours32.cpp
+  Detours64.cpp
+  Generating Code...
+  HideStaticLibSymbols.c
+  detours.vcxproj -> D:\GitHub\skyrim-drs\extern\x64\Debug\detours.lib

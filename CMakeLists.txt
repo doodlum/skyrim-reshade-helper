@@ -9,6 +9,8 @@ project(
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(XSEPlugin)
 
+find_package(magic_enum CONFIG REQUIRED)
+
 target_include_directories(
 	"${PROJECT_NAME}"
 	PUBLIC
@@ -17,6 +19,7 @@ target_include_directories(
 		${CMAKE_CURRENT_BINARY_DIR}/cmake
 		${CMAKE_CURRENT_SOURCE_DIR}/src
 		${SIMPLEINI_INCLUDE_DIRS}
+		magic_enum::magic_enum
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC CommonLibSSE::CommonLibSSE)

@@ -16,6 +16,9 @@
 
 #include <Windows.h>
 
+#include "imgui.h"
+#include "reshade/reshade.hpp"
+
 #ifdef NDEBUG
 #	include <spdlog/sinks/basic_file_sink.h>
 #else
@@ -47,7 +50,7 @@ namespace stl
 	}
 
 	template <std::size_t idx, class T>
-	void write_vfunc(REL::ID id)
+	void write_vfunc(REL::VariantID id)
 	{
 		REL::Relocation<std::uintptr_t> vtbl{ id };
 		T::func = vtbl.write_vfunc(idx, T::thunk);

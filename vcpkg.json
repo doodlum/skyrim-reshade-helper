@@ -4,6 +4,7 @@
   "description": "",
   "license": "MIT",
   "dependencies": [
-    "commonlibsse-ng"
+    "commonlibsse-ng",
+    "magic-enum"
   ]
 }

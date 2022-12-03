@@ -1,81 +1,77 @@
 
-#include <reshade/reshade.hpp>
+#include "RE/BSGraphicsTypes.h"
+
+#include "Effects.h"
+#include "Menu.h"
+#include "PreFog.h"
 
 using namespace reshade::api;
 
-HMODULE m_hModule = nullptr;
-
-static effect_runtime* m_runtime = nullptr;
-static command_list*   m_cmdlist = nullptr;
-static resource_view   m_rtv;
-static resource_view   m_rtv_srgb;
-
-struct __declspec(uuid("7251932A-ADAF-4DFC-B5CB-9A4E8CD5D6EB")) device_data
-{
-	effect_runtime* main_runtime = nullptr;
-};
-
-static void on_reshade_begin_effects(effect_runtime* runtime, command_list* cmd_list, resource_view rtv, resource_view rtv_srgb)
-{
-	m_runtime = runtime;
-	m_cmdlist = cmd_list;
-	m_rtv = rtv;
-	m_rtv_srgb = rtv_srgb;
-}
-
-void register_addon_events()
-{
-	reshade::register_event<reshade::addon_event::reshade_begin_effects>(on_reshade_begin_effects);
-}
-
-void unregister_addon_events()
-{
-	reshade::unregister_event<reshade::addon_event::reshade_begin_effects>(on_reshade_begin_effects);
-}
+HMODULE m_hModule;
 
 extern "C" __declspec(dllexport) const char* NAME = "SSE ReShade Helper";
 extern "C" __declspec(dllexport) const char* DESCRIPTION = "Renders ReShade effects before the UI, by PureDark and doodlez";
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID)
 {
-	switch (fdwReason) {
-	case DLL_PROCESS_ATTACH:
-		m_hModule = hModule;
-		break;
-	case DLL_PROCESS_DETACH:
-		unregister_addon_events();
-		reshade::unregister_addon(hModule);
-		break;
-	}
-
+	if (dwReason == DLL_PROCESS_ATTACH) m_hModule = hModule;
 	return TRUE;
 }
 
-struct Hooks
+void RegisterAddonEvents()
 {
-	struct Main_DrawWorld_MainDraw
-	{
-		static void thunk(INT64 BSGraphics_Renderer, int unk)
-		{
-			func(BSGraphics_Renderer, unk);
-			if (m_runtime) {
-				m_runtime->render_effects(m_cmdlist, m_rtv, m_rtv_srgb);
-			}
-		}
-		static inline REL::Relocation<decltype(thunk)> func;
-	};
-};
-
+	reshade::register_event<reshade::addon_event::reshade_begin_effects>(Effects::OnBeginEffectsCallback);
+	reshade::register_event<reshade::addon_event::reshade_reloaded_effects>(Effects::OnReShadeReloadedEffectsCallback);
+	reshade::register_event<reshade::addon_event::bind_render_targets_and_depth_stencil>(PreFog::on_bind_render_targets_and_depth_stencil);
+	reshade::register_overlay("Debug", Menu::DrawDebugOverlayCallback);
+	reshade::register_overlay(nullptr, Menu::DrawSettingsOverlayCallback);
+}
 
 void Load()
 {
 	if (reshade::register_addon(m_hModule)) {
 		logger::info("Registered addon");
-		register_addon_events();
+		RegisterAddonEvents();
 		// Pre-UI Hook for rendering effects
-		stl::write_thunk_call<Hooks::Main_DrawWorld_MainDraw>(REL::RelocationID(79947, 82084).address() + REL::Relocate(0x16F, 0x17A));  // EBF510 (EBF67F), F05BF0 (F05D6A)
+		Effects::InstallHooks();
+		Effects::GetSingleton()->InitialiseCustomRenders();
 		logger::info("Installed render hook");
 	} else {
 		logger::info("ReShade not present, not installing hook");
 	}
 }
+
+
+//#include <DirectXMath.h>
+//
+//struct Cinematic
+//{
+//	DirectX::XMFLOAT4 Params01[5];
+//};
+//
+//struct CinematicFade
+//{
+//	DirectX::XMFLOAT4 Params01[6];
+//};
+//
+//CinematicFade reshade_params;
+//
+//int         flag = 0;
+//static void on_map_buffer_region(device* device, resource resource, uint64_t offset, uint64_t size, map_access access, void** data)
+//{
+//	if (flag == 1) {
+//		if (size == sizeof(Cinematic)) {
+//			Cinematic& game = (Cinematic)&data;
+//			flag = 0;
+//		}
+//	} else if (flag == 2) {
+//		
+//		flag = 0;
+//	}
+
+//}
+
+//static void on_unmap_buffer_region(device* device, resource resource)
+//{
+//}
+
